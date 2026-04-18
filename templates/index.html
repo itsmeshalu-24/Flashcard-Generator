@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flashcard Generator</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f5f7fb;
+            text-align: center;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        form {
+            margin: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 15px;
+            margin: 15px auto;
+            width: 60%;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        input {
+            padding: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>📚 Flashcard Generator</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="pdf" required>
+        <button type="submit">Generate Flashcards</button>
+    </form>
+
+    {% if cards %}
+        {% for card in cards.split("\n\n") %}
+            <div class="card">
+                <p>{{ card }}</p>
+            </div>
+        {% endfor %}
+
+        <a href="/download">
+            <button>Download Flashcards PDF</button>
+        </a>
+    {% endif %}
+
+</div>
+
+</body>
+</html>
