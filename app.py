@@ -10,14 +10,17 @@ def create_cards(text):
     sentences = text.split(".")
     cards = []
 
-    for i in range(min(5, len(sentences))):
-        sentence = sentences[i].strip()
+    for sentence in sentences:
+        sentence = sentence.strip()
 
         if len(sentence) > 20:
             question = f"What is: {sentence[:50]}?"
             answer = sentence
 
             cards.append(f"Q: {question}\nA: {answer}")
+
+        if len(cards) == 5:
+            break
 
     return "\n\n".join(cards)
 
@@ -39,17 +42,30 @@ def home():
     cards = ""
 
     if request.method == "POST":
-        pdf_file = request.files["pdf"]
+        pdf_file = request.files.get("pdf")
 
-        reader = PyPDF2.PdfReader(pdf_file)
-        text = ""
+        # ✅ FIX 1: check file
+        if not pdf_file or pdf_file.filename == "":
+            return "Please upload a valid PDF"
 
-        for page in reader.pages:
-            if page.extract_text():
-                text += page.extract_text()
+        try:
+            reader = PyPDF2.PdfReader(pdf_file)
+            text = ""
 
-        cards = create_cards(text[:3000])
-        save_pdf(cards)
+            for page in reader.pages:
+                extracted = page.extract_text()
+                if extracted:
+                    text += extracted
+
+            # ✅ FIX 2: check empty text
+            if not text.strip():
+                return "No readable text found in PDF"
+
+            cards = create_cards(text[:3000])
+            save_pdf(cards)
+
+        except Exception as e:
+            return f"Error: {str(e)}"
 
     return render_template("index.html", cards=cards)
 
@@ -57,7 +73,10 @@ def home():
 # 🔹 Download route
 @app.route("/download")
 def download():
-    return send_file("flashcards.pdf", as_attachment=True)
+    try:
+        return send_file("flashcards.pdf", as_attachment=True)
+    except:
+        return "No PDF generated yet"
 
 
 if __name__ == "__main__":
